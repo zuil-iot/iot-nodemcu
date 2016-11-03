@@ -12,7 +12,7 @@ Commands are implemented using MQTT topics. The format of the topic is:
 > `/device/<deviceID>/<cmd>`
 
 The payload of the message will differ per command, but should always include
-> `{ deviceID:<deviceID }`
+> `{ deviceID:<deviceID> }`
 
 The following commands are supported:
 ### Device --> Server
