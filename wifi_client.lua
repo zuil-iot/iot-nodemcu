@@ -1,5 +1,5 @@
 local module = {}
-local success_cb = nil
+module.cb_success = nil
 
 --
 -- Wifi Setup
@@ -15,14 +15,15 @@ local function wifi_wait_ip()
     print("MAC address is: " .. wifi.ap.getmac())
     print("IP is "..wifi.sta.getip())
     print("====================================")
-    success_cb()
+    module.cb_success()
   end
 end
 
-local function wifi_start(list_aps)  
-    if list_aps then
-        print ("\t Scanning AP list")
-        for key,value in pairs(list_aps) do
+local function wifi_connect(ap_list)  
+    if ap_list then
+	tmr.stop(1)
+        print ("\t\t Scanning AP list")
+        for key,value in pairs(ap_list) do
             if config.wifi.SSID and config.wifi.SSID[key] then
                 wifi.setmode(wifi.STATION);
                 wifi.sta.config(key,config.wifi.SSID[key])
@@ -33,23 +34,25 @@ local function wifi_start(list_aps)
             end
         end
     else
-        print("Error getting AP list")
+        print("\t\tNo APs found. Waiting...")
     end
 end
 
+local function wifi_get_aps()
+	wifi.sta.getap(wifi_connect)
+end
 
 
 
 -- Start setup
-function module.start(s_cb)  
-	success_cb = s_cb
+function module.start()  
+	tmr.stop(1)
 	print("Configuring Wifi ...")
 	wifi.setmode(wifi.STATION);
-    print("\tLooking for APs ...")
-	wifi.sta.getap(wifi_start)
+	print("\tLooking for APs ...")
+	tmr.alarm(1, 2500, 1, wifi_get_aps)
 end
 
 
 return module  
-
 

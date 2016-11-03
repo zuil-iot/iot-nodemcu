@@ -1,7 +1,11 @@
 app = require("app")  
 config = require("config")  
-wifi_setup = require("wifi_setup")
-mqtt_setup = require("mqtt_setup")
+wifiClient = require("wifi_client")
+mqttClient = require("mqtt_client")
 util = require("util")
 
-wifi_setup.start(mqtt_setup.start)
+wifiClient.cb_success = mqttClient.start
+mqttClient.cb_success = app.start
+mqttClient.cb_on_message = app.handle_message
+
+wifiClient.start()
