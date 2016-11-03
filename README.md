@@ -17,6 +17,7 @@ The payload of the message will differ per command, but should always include
 The following commands are supported:
 ### Device --> Server
 - register
+
 ### Server --> Device
 - init
 - xxx
