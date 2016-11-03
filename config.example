@@ -5,14 +5,13 @@ module.ID = node.chipid()
 module.wifi = {}
 module.wifi.SSID = {}  
 module.wifi.SSID["Your_SSID"] = "Your_Password"
+module.wifi.timer = 1
 
 module.mqtt = {}
 module.mqtt.HOST = "your_mqtt_host_name"
 module.mqtt.PORT = 1883  
 module.mqtt.ENDPOINT = "device/"  
-module.mqtt.ME = module.mqtt.ENDPOINT .. module.ID
-module.mqtt.PING_MSG = "id=" .. module.ID 
 module.mqtt.PING_TIME = 1000
-
+module.mqtt.timer = 6
 
 return module  
