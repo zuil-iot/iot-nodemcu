@@ -11,19 +11,19 @@ local function wifi_wait_ip()
   if wifi.sta.getip()== nil then
     print("IP unavailable, Waiting...")
   else
-    tmr.stop(cfg.timer)
+    tmr.stop(cfg.TIMER)
     print("\n====================================")
     print("ESP8266 mode is: " .. wifi.getmode())
     print("MAC address is: " .. wifi.ap.getmac())
     print("IP is "..wifi.sta.getip())
     print("====================================")
-    module.cb_success()
+	if (module.cb_success ~= nill) then module.cb_success() end
   end
 end
 
 local function wifi_connect(ap_list)  
     if ap_list then
-	tmr.stop(cfg.timer)
+	tmr.stop(cfg.TIMER)
         print ("\t\t Scanning AP list")
         for key,value in pairs(ap_list) do
             if cfg.SSID and cfg.SSID[key] then
@@ -32,7 +32,7 @@ local function wifi_connect(ap_list)
                 print("Connecting to " .. key .. " ...")
                 wifi.sta.connect()
                 --cfg.SSID = nil  -- can save memory
-                tmr.alarm(cfg.timer, 2500, 1, wifi_wait_ip)
+                tmr.alarm(cfg.TIMER, 2500, 1, wifi_wait_ip)
             end
         end
     else
@@ -49,11 +49,11 @@ end
 -- Start
 --
 function module.start()  
-	tmr.stop(cfg.timer)
+	tmr.stop(cfg.TIMER)
 	print("Configuring Wifi ...")
 	wifi.setmode(wifi.STATION);
 	print("\tLooking for APs ...")
-	tmr.alarm(cfg.timer, 2500, 1, wifi_get_aps)
+	tmr.alarm(cfg.TIMER, 2500, 1, wifi_get_aps)
 end
 
 

@@ -1,52 +1,58 @@
 local module = {}
 local cfg = config.mqtt
 local me = nil
-local m = nil
+m = nil
 
 module.cb_success = nil
-module.cb_on_message = nil
 
 
 -- Send to broker
-local function send(cmd,msg)
+function module.send(cmd,msg)
 	-- Set topic
-	local topic = me .. "/" .. cmd
+	local topic = me .. "/from/" .. cmd
 	-- Set up message
 	if msg == nil then
 		msg = {}
 	end
 	msg.nodeID = config.ID
+	-- Encode message
+	ok, json = pcall(cjson.encode, msg)
+	if ok then
 	-- Send
-	m:publish(topic,msg,0,0)
+		if (cmd ~= "ping") then print("Send: "..cmd) end
+		m:publish(topic,cjson.encode(msg),0,0)
+	else
+		print("Failed to encode!")
+	end
 end
 
 -- Ping broker
 local function send_ping()
-	send("ping",nil);
+	module.send("ping",nil);
 end
 
--- Subscribe to my topics and register device
-local function register_myself()
-    print("Subscribing to my topics")
-	m:subscribe(me .. "/+",0,function(conn)
-		print("Successfully subscribed to data endpoint")
+-- Subscribe to a topic (cmd) and register message callback (message_cb)
+function module.subscribe(cmd)
+	m:subscribe(me .. "/to/"..cmd,0,function(conn)
 		-- Register callback for messages
-		m:on("message", module.cb_on_message)
-		module.cb_success();
+		print("Subscribed to: ".. cmd)	-- <<<<<<<<<<<<<<< BUG! cmd is the same for all callbacks if done quickly
 	end)
+end
+
+function module.set_message_cb(message_cb)
+	if (message_cb ~= nil) then m:on("message", message_cb) end
 end
 
 -- Successful connect
 local function cb_connect_success (con)
-	print("\t\tSuccess")
-	-- Register
-	register_myself()
+	print("\t\tRegistered as "..config.ID)
 	-- Setup Ping Timer
-	tmr.alarm(cfg.timer, cfg.PING_TIME, tmr.ALARM_AUTO, send_ping)
+	tmr.alarm(cfg.TIMER, cfg.PING_TIME, tmr.ALARM_AUTO, send_ping)
+	if (module.cb_success ~= nil) then module.cb_success() end
 end
 -- Failed connect
 local function cb_connect_failure (con, reason)
-	print("\t\tFailed [Code = "..reason.."]")
+	print("\t\tMQTT Connect failed [Code = "..reason.."]")
 end
 
 --
@@ -56,7 +62,8 @@ function module.start()
 	print("Starting MQTT...")
 	-- Create client
 	me = cfg.ENDPOINT .. config.ID
-	m = mqtt.Client(config.ID, 120)
+	m = mqtt.Client(config.ID, cfg.KEEPALIVE)
+	print("MQTT\t"..node.heap())
 	-- Connect to broker
 	print("\tConnecting to " .. cfg.HOST .. ":" .. cfg.PORT)
 	m:connect(cfg.HOST, cfg.PORT, 0, 1, cb_connect_success, cb_connect_failure)
