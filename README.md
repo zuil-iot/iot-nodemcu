@@ -3,7 +3,7 @@
 ## Setup
 - Make a copy of the config
 	
-	cp config.example config.lua
+	cp config.example load/config.lua
 - Edit with your parameters
 
 ## Commands

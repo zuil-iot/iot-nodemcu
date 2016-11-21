@@ -1,0 +1,12 @@
+Digital in:
+	- >1.5v		: false
+	- <1.5v		: true
+Analog in:
+	- 0v		: 0
+	- 3v		: 1024
+
+Photo sensor: (works well with 33k pullup)
+	- bright	70 ohms	
+	- light:	1k ohms
+	- dark:		55k ohms
+

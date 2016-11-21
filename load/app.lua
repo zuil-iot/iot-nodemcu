@@ -1,0 +1,22 @@
+print("Start\t"..node.heap())
+--util = require("util")
+--print("Util\t"..node.heap())
+config = require("config")
+print("Config\t"..node.heap())
+wifiClient = require("wifi_client")
+print("Wifi\t"..node.heap())
+mqttClient = require("mqtt_client")
+print("MQTT\t"..node.heap())
+messages = require("messages")
+print("Msg \t"..node.heap())
+state = require("state")
+print("State \t"..node.heap())
+pins = require("pins")
+print("Pins \t"..node.heap())
+
+wifiClient.set_success_cb(mqttClient.start)
+mqttClient.set_success_cb(messages.start)
+mqttClient.set_message_cb(messages.handle_message)
+
+wifiClient.start()
+ 

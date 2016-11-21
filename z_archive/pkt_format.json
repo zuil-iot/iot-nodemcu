@@ -1,0 +1,33 @@
+{
+	config: {
+		registered: <boolean>
+		io: {
+			D0: {
+				type: <gpio, adc, i2c, etc>
+				mode: <in, out, int, etc>
+				index: <0-12>
+				alias: <led1, sensor2, etc>
+			}
+		}
+	},
+	req_state: {
+		io: {
+			D0: {
+				val: true
+			}
+		}
+	},
+	cur_state: {
+		io: {
+			D0: {
+				val: true
+			},
+			D1: {
+				val: false
+			},
+			A0: {
+				val: 243
+			}
+		}
+	}
+}

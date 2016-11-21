@@ -45,6 +45,11 @@ local function wifi_get_aps()
 end
 
 
+-- Set callbacks
+function module.set_success_cb(cb)
+	if (cb ~= nil) then module.cb_success=cb end
+end
+
 --
 -- Start
 --

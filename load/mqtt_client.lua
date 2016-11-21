@@ -3,52 +3,64 @@ local cfg = config.mqtt
 local me = nil
 m = nil
 
-module.cb_success = nil
+cb_success = nil
+cb_message = nil
 
 
 -- Send to broker
-function module.send(cmd,msg)
+function module.send(msg_type,data)
 	-- Set topic
-	local topic = me .. "/from/" .. cmd
+	local topic = me .. "/from/" .. msg_type
 	-- Set up message
-	if msg == nil then
-		msg = {}
-	end
-	msg.nodeID = config.ID
+	local msg = {}
+	msg.msg_type = msg_type
+	msg.deviceID = config.ID
+	if (data == nil) then data = {} end
+	msg.data = data
 	-- Encode message
 	ok, json = pcall(cjson.encode, msg)
 	if ok then
 	-- Send
-		if (cmd ~= "ping") then print("Send: "..cmd) end
-		m:publish(topic,cjson.encode(msg),0,0)
+		if (msg_type ~= "ping") then print("Send: "..msg_type) end
+		m:publish(topic,json,0,0)
+		tmr.interval(cfg.TIMER, cfg.PING_TIME) -- Reset ping timer
 	else
 		print("Failed to encode!")
 	end
 end
-
+ 
 -- Ping broker
 local function send_ping()
 	module.send("ping",nil);
 end
 
--- Subscribe to a topic (cmd) and register message callback (message_cb)
-function module.subscribe(cmd)
-	m:subscribe(me .. "/to/"..cmd,0,function(conn)
-		-- Register callback for messages
-		print("Subscribed to: ".. cmd)	-- <<<<<<<<<<<<<<< BUG! cmd is the same for all callbacks if done quickly
-	end)
+-- Set callbacks
+function module.set_message_cb(cb)
+	if (cb ~= nil) then cb_message=cb end
 end
-
-function module.set_message_cb(message_cb)
-	if (message_cb ~= nil) then m:on("message", message_cb) end
+function module.set_success_cb(cb)
+	if (cb ~= nil) then cb_success=cb end
 end
 
 -- Successful connect
 local function cb_connect_success (con)
 	print("\t\tRegistered as "..config.ID)
 	-- Setup Ping Timer
+	print("\t\tStarting ping timer")
 	tmr.alarm(cfg.TIMER, cfg.PING_TIME, tmr.ALARM_AUTO, send_ping)
-	if (module.cb_success ~= nil) then module.cb_success() end
+	-- Set up message handler
+	if (cb_message ~= nil) then
+		print("\t\tSetting up message handler")
+		m:on("message", cb_message)
+	end
+	-- Subscribe to incoming messages
+	local in_topic = me.."/to"
+	print("\t\tSubscribing to: "..in_topic)
+	m:subscribe(in_topic,0,function(conn)
+		print("\t\t\tSubscribed")
+		-- Done. Run success callback
+		if (cb_success ~= nil) then cb_success() end
+	end)
 end
 -- Failed connect
 local function cb_connect_failure (con, reason)

@@ -1,2 +1,2 @@
-config.lua
+load/config.lua
 *.swp
