@@ -10,6 +10,12 @@ local module = {
 	},
 	cur_state = {
 		pins = {}
+	},
+	sent_state = {
+		pins = {}
+	},
+	stream = {
+		pins = {}
 	}
 }
 return module;

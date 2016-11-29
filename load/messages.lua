@@ -23,7 +23,10 @@ function module.send_state ()
 end
 
 -- update
-function module.send_update()
+function module.send_stream(m)
+	local msg = {}
+	msg.stream = m
+	mqttClient.send("stream",msg)
 end
 
 -- event
