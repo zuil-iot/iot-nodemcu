@@ -3,7 +3,7 @@ local module = {}
 module.PREFIX = "nodemcu"
 module.ID = module.PREFIX .. "_" .. node.chipid()
 module.HW = "nodemcu"
-module.SW = "v0.3.1"
+module.SW = "v0.3.2x"
 
 module.wifi = {}
 module.wifi.SSID = {}  
