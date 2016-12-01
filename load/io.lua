@@ -2,16 +2,19 @@ module = {}
 local my_env = env.io
 
 function module.setPin(pin,on)
-	local v = gpio.HIGH
-	local reqStatus = "off"
-	if on then
-		reqStatus = "on"
-		v = gpio.LOW
+	local pinType = state.config.pins[pin].type
+	if pinType == "gpio" then
+		local v = gpio.HIGH
+		local reqStatus = "off"
+		if on then
+			reqStatus = "on"
+			v = gpio.LOW
+		end
+		local i = state.config.pins[pin].index
+		print ("Set Pin ["..pin.."/"..i.."/"..v.."] = ",reqStatus)
+		gpio.write(i,v)
+		state.cur_state.pins[pin].v = on;
 	end
-	local i = state.config.pins[pin].index
-	print ("Set Pin ["..pin.."/"..i.."/"..v.."] = ",reqStatus)
-	gpio.write(i,v)
-	state.cur_state.pins[pin].v = on;
 end
 
 function module.doTimer(start)
@@ -55,9 +58,31 @@ function module.readPin(pin)
 			local deltaPct = math.abs(v-sent)*100/vScale
 			if (deltaPct > pinSendDelta ) then changed = true end
 		end
+	elseif pinType == "dht" then
+		local status, temp, humi,temp_dec,humi_dec = dht.read(pinIndex)
+		v = {}
+		if status == dht.OK then
+		v.temp = temp*9/5+32
+		v.humi = humi
+		v.status = "ok"
+		elseif status == dht.ERROR_CHECKSUM then
+			print ("DHT Error: Checksum")
+			v.status = "err_checksum"
+			v.status = "err_checksum"
+		elseif status == dht.ERROR_TIMEOUT then
+			print ("DHT Error: Timeout")
+			v.status = "err_timeout"
+		end
+		
+		if (sent == 'na') then changed = true
+		elseif (v.status ~= sent.status) then changed = true
+		elseif (v.temp ~= sent.temp) then changed = true
+		elseif (v.humi ~= sent.humi) then changed = true
+		end
+		--print ("Read Pin ["..pin.."] = ",cjson.encode(v),"{",cjson.encode(sent),":",changed,"}")
 	end
-	--print ("Read Pin ["..pin.."] = ",v,"{",sent,":",changed,"}")
 	state.cur_state.pins[pin].val = v
+	-- print ("Read Pin ["..pin.."] = ",v,"{",sent,":",changed,"}")
 	return changed
 end
 
@@ -138,6 +163,8 @@ function module.init(pins)
 				node.restart()
 				return
 			end
+		elseif c.type == "dht" then
+			-- Nothing to do for setup
 		end
 	end
 
