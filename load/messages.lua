@@ -11,7 +11,9 @@ local validate_message
 -- register
 function module.send_register()
     print("\tRegistering with server")
-    mqttClient.send("register",nil)
+	local msg = {}
+	msg.sw_version = config.SW
+    mqttClient.send("register",msg)
 end
 
 -- state
@@ -46,13 +48,13 @@ end
 -- config
 local function do_config(req)
 	print("\t\t\tGot new config")
+	state.registered = req.registered;
+	-- Init pins
+	pins.init(req.config.pins)
+	pins.set(req.req_state.pins)
+	pins.updateAndSend()
 	-- Check registered
-	state.config.registered = req.config.registered;
-	if (state.config.registered) then
-		-- Init pins
-		pins.init(req.config.pins)
-		pins.set(req.req_state.pins)
-		pins.updateAndSend()
+	if (state.registered) then
 		print ("\t\t\t\tReady to go, Sparky!")
 	else
 		print ("\t\t\t\tNot registered")
@@ -68,6 +70,11 @@ end
 -- read
 local function do_read(req)
 	pins.updateAndSend()
+end
+
+-- unregister
+local function do_unregister()
+	state.registered = false;
 end
 
 
@@ -107,7 +114,7 @@ function module.handle_message(conn, topic, msg)
 		local msg_data = req.data
 		if (msg_type == nil) then print ("Error [no msg_type]")
 		elseif (msg_type == "config") then do_config(msg_data)
-		elseif (state.config.registered) then
+		elseif (state.registered) then
 			if (msg_type == "write") then do_write(msg_data)
 			elseif (msg_type == "read") then do_read(msg_data)
 			else print ("Error [unknown command]: <"..msg_type..">")

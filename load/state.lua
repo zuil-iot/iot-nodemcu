@@ -1,6 +1,6 @@
 local module = {
+	registered = false,
 	config = {
-		registered = false,
 		pins = {}
 	},
 	status = {
