@@ -14,6 +14,16 @@ function module.setPin(pin,on)
 	state.cur_state.pins[pin].v = on;
 end
 
+function module.doTimer(start)
+	if (start) then
+		print("Start Timer ["..my_env.TIMER.."] = "..my_env.UPDATE_TIME.."ms")
+		tmr.alarm(my_env.TIMER, my_env.UPDATE_TIME, tmr.ALARM_AUTO, module.updateAndSend)
+	else
+		print("Stop Timer ["..my_env.TIMER.."]")
+		tmr.unregister(my_env.TIMER)
+	end
+end
+
 function module.readPin(pin)
 	local pinType = state.config.pins[pin].type
 	local pinIndex = state.config.pins[pin].index
@@ -130,8 +140,7 @@ function module.init(pins)
 			end
 		end
 	end
-	print("Start Timer ["..my_env.TIMER.."] = "..my_env.UPDATE_TIME.."ms")
-	tmr.alarm(my_env.TIMER, my_env.UPDATE_TIME, tmr.ALARM_AUTO, module.updateAndSend)
+
 end
 
 

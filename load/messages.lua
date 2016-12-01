@@ -12,6 +12,7 @@ local validate_message
 function module.send_register()
     print("\tRegistering with server")
 	local msg = {}
+	msg.deviceID = env.ID
 	msg.sw_version = env.SW
     mqttClient.send("register",msg)
 end
@@ -56,8 +57,10 @@ local function do_config(req)
 	-- Check registered
 	if (state.registered) then
 		print ("\t\t\t\tReady to go, Sparky!")
+		io.doTimer(true);
 	else
 		print ("\t\t\t\tNot registered")
+		io.doTimer(false);
 	end
 end
 
