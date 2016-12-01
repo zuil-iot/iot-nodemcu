@@ -1,5 +1,5 @@
 local module = {}
-local cfg = config.mqtt
+local my_env = env.mqtt
 local me = nil
 m = nil
 
@@ -14,7 +14,7 @@ function module.send(msg_type,data)
 	-- Set up message
 	local msg = {}
 	msg.msg_type = msg_type
-	msg.deviceID = config.ID
+	msg.deviceID = env.ID
 	if (data == nil) then data = {} end
 	msg.data = data
 	-- Encode message
@@ -23,7 +23,7 @@ function module.send(msg_type,data)
 	-- Send
 		if (msg_type ~= "ping") then print("Send: "..msg_type) end
 		m:publish(topic,json,0,0)
-		tmr.interval(cfg.TIMER, cfg.PING_TIME) -- Reset ping timer
+		tmr.interval(my_env.TIMER, my_env.PING_TIME) -- Reset ping timer
 	else
 		print("Failed to encode!")
 	end
@@ -44,10 +44,10 @@ end
 
 -- Successful connect
 local function cb_connect_success (con)
-	print("\t\tRegistered as "..config.ID)
+	print("\t\tRegistered as "..env.ID)
 	-- Setup Ping Timer
 	print("\t\tStarting ping timer")
-	tmr.alarm(cfg.TIMER, cfg.PING_TIME, tmr.ALARM_AUTO, send_ping)
+	tmr.alarm(my_env.TIMER, my_env.PING_TIME, tmr.ALARM_AUTO, send_ping)
 	-- Set up message handler
 	if (cb_message ~= nil) then
 		print("\t\tSetting up message handler")
@@ -73,12 +73,12 @@ end
 function module.start()
 	print("Starting MQTT...")
 	-- Create client
-	me = cfg.ENDPOINT .. config.ID
-	m = mqtt.Client(config.ID, cfg.KEEPALIVE)
+	me = my_env.ENDPOINT .. env.ID
+	m = mqtt.Client(env.ID, my_env.KEEPALIVE)
 	print("MQTT\t"..node.heap())
 	-- Connect to broker
-	print("\tConnecting to " .. cfg.HOST .. ":" .. cfg.PORT)
-	m:connect(cfg.HOST, cfg.PORT, 0, 1, cb_connect_success, cb_connect_failure)
+	print("\tConnecting to " .. my_env.HOST .. ":" .. my_env.PORT)
+	m:connect(my_env.HOST, my_env.PORT, 0, 1, cb_connect_success, cb_connect_failure)
 end
 
 return module

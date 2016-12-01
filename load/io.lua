@@ -1,5 +1,5 @@
 module = {}
-local cfg = config.pins
+local my_env = env.io
 
 function module.setPin(pin,on)
 	local v = gpio.HIGH
@@ -35,7 +35,7 @@ function module.readPin(pin)
 		local vMax = 1024
 		local vScale = vMax - vMin
 		local pinSendDelta = state.config.pins[pin].send_delta
-		if (pinSendDelta == nil) then pinSendDelta = config.pins.DEFAULT_SEND_DELTA end
+		if (pinSendDelta == nil) then pinSendDelta = my_env.DEFAULT_SEND_DELTA end
 		v = adc.read(pinIndex)
 		if pinInvert then
 			v = vMax - v
@@ -65,8 +65,8 @@ function module.updateAndSend()
 		end
 		-- Check to see if we need to stream
 		if (c.stream) then
-			state.stream.pins[p] = state.stream.pins[p] - cfg.UPDATE_TIME
-			if state.stream.pins[p] < cfg.UPDATE_TIME/2 then
+			state.stream.pins[p] = state.stream.pins[p] - my_env.UPDATE_TIME
+			if state.stream.pins[p] < my_env.UPDATE_TIME/2 then
 				-- Time to send stream
 				state.stream.pins[p] = c.stream*1000
 				s = {}
@@ -110,7 +110,7 @@ function module.init(pins)
 		
 		-- Check whether to stream
 		if (c.stream) then 
-			state.stream.pins[p] = cfg.INITIAL_STREAM_DELAY	-- Force stream send N seconds after boot up
+			state.stream.pins[p] = my_env.INITIAL_STREAM_DELAY	-- Force stream send N seconds after boot up
 		end
 		
 		-- Set type and mode
@@ -130,8 +130,8 @@ function module.init(pins)
 			end
 		end
 	end
-	print("Start Timer ["..cfg.TIMER.."] = "..cfg.UPDATE_TIME.."ms")
-	tmr.alarm(cfg.TIMER, cfg.UPDATE_TIME, tmr.ALARM_AUTO, module.updateAndSend)
+	print("Start Timer ["..my_env.TIMER.."] = "..my_env.UPDATE_TIME.."ms")
+	tmr.alarm(my_env.TIMER, my_env.UPDATE_TIME, tmr.ALARM_AUTO, module.updateAndSend)
 end
 
 

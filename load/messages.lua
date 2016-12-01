@@ -12,7 +12,7 @@ local validate_message
 function module.send_register()
     print("\tRegistering with server")
 	local msg = {}
-	msg.sw_version = config.SW
+	msg.sw_version = env.SW
     mqttClient.send("register",msg)
 end
 
@@ -49,10 +49,10 @@ end
 local function do_config(req)
 	print("\t\t\tGot new config")
 	state.registered = req.registered;
-	-- Init pins
-	pins.init(req.config.pins)
-	pins.set(req.req_state.pins)
-	pins.updateAndSend()
+	-- Init I/O
+	io.init(req.config.pins)
+	io.set(req.req_state.pins)
+	io.updateAndSend()
 	-- Check registered
 	if (state.registered) then
 		print ("\t\t\t\tReady to go, Sparky!")
@@ -63,13 +63,13 @@ end
 
 -- write
 local function do_write(req)
-	pins.set(req.req_state.pins)
-	pins.updateAndSend()
+	io.set(req.req_state.pins)
+	io.updateAndSend()
 end
 
 -- read
 local function do_read(req)
-	pins.updateAndSend()
+	io.updateAndSend()
 end
 
 -- unregister
@@ -93,9 +93,9 @@ validate_message =  function(msg)
 		if (req.deviceID == nil) then
 			-- deviceID missing from message
 			print ("\t\tMissing deviceID in message")
-        elseif (req.deviceID ~= config.ID) then
+        elseif (req.deviceID ~= env.ID) then
 			-- Wrong deviceID
-            print ("\t\tError [Wrong NodeID "..req.deviceID..":"..config.ID.."]")
+            print ("\t\tError [Wrong NodeID "..req.deviceID..":"..env.ID.."]")
         elseif (req.msg_type == nil) then
 			-- No Message Type
             print ("\t\tError [No Command in message")
