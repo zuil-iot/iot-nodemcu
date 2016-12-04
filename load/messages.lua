@@ -51,8 +51,8 @@ local function do_config(req)
 	print("\t\t\tGot new config")
 	state.registered = req.registered;
 	-- Init I/O
-	io.init(req.config.pins)
-	io.set(req.req_state.pins)
+	io.init(req.config.io)
+	io.set(req.req_state.io)
 	io.updateAndSend()
 	-- Check registered
 	if (state.registered) then
@@ -66,7 +66,7 @@ end
 
 -- write
 local function do_write(req)
-	io.set(req.req_state.pins)
+	io.set(req.req_state.io)
 	io.updateAndSend()
 end
 

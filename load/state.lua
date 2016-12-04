@@ -1,21 +1,21 @@
 local module = {
 	registered = false,
 	config = {
-		pins = {}
+		io = {}
 	},
 	status = {
 	},
 	req_state = {
-		pins = {}
+		io = {}
 	},
 	cur_state = {
-		pins = {}
+		io = {}
 	},
 	sent_state = {
-		pins = {}
+		io = {}
 	},
 	stream = {
-		pins = {}
+		io = {}
 	}
 }
 return module;
